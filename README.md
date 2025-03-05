@@ -1,5 +1,5 @@
 # ABTestFDR
-Supplementary code for Design of Bayesian A/B Tests with False Discovery Rates and Power manuscript 
+Supplementary code for Design of Bayesian A/B Tests Controlling False Discovery Rates and Power manuscript 
 
 There are six code files for this manuscript.
 
