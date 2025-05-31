@@ -28,32 +28,11 @@ ssd.multi <- algorithm2Multi(par.a = params.full[rep(seq(1, 59, 2), each = m.ssd
                              mat = tree.mat, 
                              hyper = rbind(rep(1,12), seq(12, 1, by = -1), rep(1,12), seq(12, 1, by = -1)), 
                              n0 = 12000, c = 1, seed = 1, 
-                             setup.par = FALSE, contour = TRUE, boot = TRUE)
+                             setup.par = FALSE)
 toc <- Sys.time()
 toc - tic
 ## save results
-for (i in 1:length(ssd.multi)){
-  write.csv(ssd.multi[[i]], paste0("ssd_multi", i, ".csv"), row.names = FALSE)
-}
-
-## implement bootstrapping process
-M.boot <- 5000
-registerDoSNOW(cl)
-pb <- txtProgressBar(max = M.boot, style = 3)
-progress <- function(n) setTxtProgressBar(pb, n)
-opts <- list(progress = progress)
-
-tic <- Sys.time()
-boot.multi <- bootCIs(ssd.multi, M = M.boot, seed = 100, setup.par = FALSE)
-toc <- Sys.time()
-toc - tic
-
-## save results
-write.csv(boot.multi, "boot_multi.csv", row.names = FALSE)
-
-## get bootstrap confidence intervals
-quantile(boot.multi[,1], probs = c(0.025, 0.975))
-quantile(boot.multi[,2], probs = c(0.025, 0.975))
+write.csv(ssd.multi, paste0("ssd_multi.csv"), row.names = FALSE)
 
 ## confirm the performance of the recommended sample size and decision threshold
 ## create a function to estimate posterior probabilities for the multinomial model
@@ -102,7 +81,7 @@ progress <- function(n) setTxtProgressBar(pb, n)
 opts <- list(progress = progress)
 
 ## extract sample size recommendation
-n.multi <- ssd.multi[[1]][1]
+n.multi <- ssd.multi[1]
 ## define hyperparameters for multinomial distribution
 alphas1 <- rep(1,12); betas1 <- seq(12, 1, by = -1)
 alphas2 <- rep(1,12); betas2 <- seq(12, 1, by = -1)
@@ -141,7 +120,7 @@ write.csv(con.multi, "con_multi.csv", row.names = FALSE)
 
 ## confirm FDR and average power
 ## check which posterior probabilities are greater than the recommended threshold
-bin <- con.multi > ssd.multi[[1]][2]
+bin <- con.multi > ssd.multi[2]
 ## determine which repetitions have no discoveries to avoid division by 0
 zeros <- rowMeans(bin) == 0
 ## create a matrix that dictates which hypotheses are true (1) and false (0)
@@ -153,7 +132,6 @@ for (j in 1:4){
   }
 }
 
-## repeat for all simulation repetitions
 trues.all <- trues[rep(1:30, m.con/30),]
 
 ## compute confirmatory power and FDR
@@ -192,32 +170,11 @@ ssd.bin <- algorithm2Bin(par.a = mars.full[rep(seq(1, 59, 2), each = m.ssd/30), 
                          q = 0.05, target.pwr = 0.8, deltas = cbind(rep(0, 5), rep(Inf, 5)), 
                          hyper = rbind(rep(1,5), rep(1,5), rep(1,5), rep(1,5)), 
                          n0 = 12000, c = 1, seed = 300, 
-                         setup.par = FALSE, contour = TRUE, boot = TRUE)
+                         setup.par = FALSE)
 toc <- Sys.time()
 toc - tic
 ## save results
-for (i in 1:length(ssd.bin)){
-  write.csv(ssd.bin[[i]], paste0("ssd_bin", i, ".csv"), row.names = FALSE)
-}
-
-## implement bootstrapping process
-M.boot <- 5000
-registerDoSNOW(cl)
-pb <- txtProgressBar(max = M.boot, style = 3)
-progress <- function(n) setTxtProgressBar(pb, n)
-opts <- list(progress = progress)
-
-tic <- Sys.time()
-boot.bin <- bootCIs(ssd.bin, M = M.boot, seed = 100, setup.par = FALSE)
-toc <- Sys.time()
-toc - tic
-
-## save results
-write.csv(boot.bin, "boot_bin.csv", row.names = FALSE)
-
-## get bootstrap confidence intervals
-quantile(boot.bin[,1], probs = c(0.025, 0.975))
-quantile(boot.bin[,2], probs = c(0.025, 0.975))
+write.csv(ssd.bin, paste0("ssd_bin.csv"), row.names = FALSE)
 
 ## confirm the performance of the recommended sample size and decision threshold
 ## when the data are generated from independent binomial distributions
@@ -228,7 +185,7 @@ progress <- function(n) setTxtProgressBar(pb, n)
 opts <- list(progress = progress)
 
 ## extract sample size recommendation
-n.bin <- ssd.bin[[1]][1]
+n.bin <- ssd.bin[1]
 
 ## implement confirmation simulations with BETA(1,1) priors for each probability
 tic <- Sys.time()
@@ -262,7 +219,7 @@ write.csv(con.bin, "con_bin.csv", row.names = FALSE)
 
 ## confirm FDR and average power
 ## check which posterior probabilities are greater than the recommended threshold
-bin <- con.bin > ssd.bin[[1]][2]
+bin <- con.bin > ssd.bin[2]
 ## determine which repetitions have no discoveries to avoid division by 0
 zeros <- rowMeans(bin) == 0
 ## use same trues.all matrix from before to compute confirmatory power and FDR
@@ -290,33 +247,12 @@ ssd.1 <- algorithm2Multi(par.a = params1[rep(seq(1, 9, 2), each = m.ssd/5), ],
                          mat = tree.mat, 
                          hyper = rbind(rep(1,12), seq(12, 1, by = -1), rep(1,12), seq(12, 1, by = -1)), 
                          n0 = 7000, c = 1, seed = 400, 
-                         setup.par = FALSE, contour = TRUE, boot = TRUE)
+                         setup.par = FALSE)
 toc <- Sys.time()
 toc - tic
 
 ## save results
-for (i in 1:length(ssd.1)){
-  write.csv(ssd.1[[i]], paste0("ssd_1", i, ".csv"), row.names = FALSE)
-}
-
-## implement bootstrapping process
-M.boot <- 5000
-registerDoSNOW(cl)
-pb <- txtProgressBar(max = M.boot, style = 3)
-progress <- function(n) setTxtProgressBar(pb, n)
-opts <- list(progress = progress)
-
-tic <- Sys.time()
-boot.1 <- bootCIs(ssd.1, M = M.boot, seed = 500, setup.par = FALSE)
-toc <- Sys.time()
-toc - tic
-
-## save results
-write.csv(boot.1, "boot_1.csv", row.names = FALSE)
-
-## get bootstrap confidence intervals
-quantile(boot.1[,1], probs = c(0.025, 0.975))
-quantile(boot.1[,2], probs = c(0.025, 0.975))
+write.csv(ssd.1, paste0("ssd_1.csv"), row.names = FALSE)
 
 ## consider the models with two false hypotheses
 m.ssd <- 30000
@@ -334,35 +270,12 @@ ssd.2 <- algorithm2Multi(par.a = params2[rep(seq(1, 19, 2), each = m.ssd/10), ],
                          mat = tree.mat, 
                          hyper = rbind(rep(1,12), seq(12, 1, by = -1), rep(1,12), seq(12, 1, by = -1)), 
                          n0 = 11000, c = 1, seed = 600, 
-                         setup.par = FALSE, contour = TRUE, boot = TRUE)
-toc <- Sys.time()
-toc - tic
-
-ssd.2[[1]]
-
-## save results
-for (i in 1:length(ssd.2)){
-  write.csv(ssd.2[[i]], paste0("ssd_2", i, ".csv"), row.names = FALSE)
-}
-
-## implement bootstrapping process
-M.boot <- 5000
-registerDoSNOW(cl)
-pb <- txtProgressBar(max = M.boot, style = 3)
-progress <- function(n) setTxtProgressBar(pb, n)
-opts <- list(progress = progress)
-
-tic <- Sys.time()
-boot.2 <- bootCIs(ssd.2, M = M.boot, seed = 700, setup.par = FALSE)
+                         setup.par = FALSE)
 toc <- Sys.time()
 toc - tic
 
 ## save results
-write.csv(boot.2, "boot_2.csv", row.names = FALSE)
-
-## get bootstrap confidence intervals
-quantile(boot.2[,1], probs = c(0.025, 0.975))
-quantile(boot.2[,2], probs = c(0.025, 0.975))
+write.csv(ssd.2, paste0("ssd_2.csv"), row.names = FALSE)
 
 ## consider the models with three false hypotheses
 m.ssd <- 30000
@@ -380,35 +293,12 @@ ssd.3 <- algorithm2Multi(par.a = params3[rep(seq(1, 19, 2), each = m.ssd/10), ],
                          mat = tree.mat, 
                          hyper = rbind(rep(1,12), seq(12, 1, by = -1), rep(1,12), seq(12, 1, by = -1)), 
                          n0 = 15000, c = 1, seed = 800, 
-                         setup.par = FALSE, contour = TRUE, boot = TRUE)
-toc <- Sys.time()
-toc - tic
-
-ssd.3[[1]]
-
-## save results
-for (i in 1:length(ssd.3)){
-  write.csv(ssd.3[[i]], paste0("ssd_3", i, ".csv"), row.names = FALSE)
-}
-
-## implement bootstrapping process
-M.boot <- 5000
-registerDoSNOW(cl)
-pb <- txtProgressBar(max = M.boot, style = 3)
-progress <- function(n) setTxtProgressBar(pb, n)
-opts <- list(progress = progress)
-
-tic <- Sys.time()
-boot.3 <- bootCIs(ssd.3, M = M.boot, seed = 900, setup.par = FALSE)
+                         setup.par = FALSE)
 toc <- Sys.time()
 toc - tic
 
 ## save results
-write.csv(boot.3, "boot_3.csv", row.names = FALSE)
-
-## get bootstrap confidence intervals
-quantile(boot.3[,1], probs = c(0.025, 0.975))
-quantile(boot.3[,2], probs = c(0.025, 0.975))
+write.csv(ssd.3, paste0("ssd_3.csv"), row.names = FALSE)
 
 ## consider the models with four false hypotheses
 m.ssd <- 30000
@@ -426,35 +316,105 @@ ssd.4 <- algorithm2Multi(par.a = params4[rep(seq(1, 9, 2), each = m.ssd/5), ],
                          mat = tree.mat, 
                          hyper = rbind(rep(1,12), seq(12, 1, by = -1), rep(1,12), seq(12, 1, by = -1)), 
                          n0 = 18000, c = 1, seed = 1000, 
-                         setup.par = FALSE, contour = TRUE, boot = TRUE)
+                         setup.par = FALSE)
 toc <- Sys.time()
 toc - tic
 
-ssd.4[[1]]
-
 ## save results
-for (i in 1:length(ssd.4)){
-  write.csv(ssd.4[[i]], paste0("ssd_4", i, ".csv"), row.names = FALSE)
-}
+write.csv(ssd.4, paste0("ssd_4.csv"), row.names = FALSE)
 
-## implement bootstrapping process
-M.boot <- 5000
+## now implement the simulations for the scenario where we allow the decision
+## threshold to change with the hypothesis
+## set up parallelization
+m.ssd <- 30000
+cores=detectCores()
+cl <- makeSOCKcluster(cores[1]-1)
+
 registerDoSNOW(cl)
-pb <- txtProgressBar(max = M.boot, style = 3)
+pb <- txtProgressBar(max = m.ssd, style = 3)
 progress <- function(n) setTxtProgressBar(pb, n)
 opts <- list(progress = progress)
 
+## implement sample size calculation
 tic <- Sys.time()
-boot.4 <- bootCIs(ssd.4, M = M.boot, seed = 1100, setup.par = FALSE)
+ssd.thres <- algorithm2Thres(par.a = params.full[rep(seq(1, 59, 2), each = m.ssd/30), ], 
+                             par.b = params.full[rep(seq(2, 60, 2), each = m.ssd/30), ], 
+                             q = 0.05, target.pwr = 0.8, deltas = cbind(rep(0, 5), rep(Inf, 5)), 
+                             mat = tree.mat, 
+                             hyper = rbind(rep(1,12), seq(12, 1, by = -1), rep(1,12), seq(12, 1, by = -1)), 
+                             n0 = 12000, c = 1, seed = 1, 
+                             setup.par = FALSE)
 toc <- Sys.time()
 toc - tic
 
 ## save results
-write.csv(boot.4, "boot_4.csv", row.names = FALSE)
+write.csv(ssd.thres, paste0("ssd_thres.csv"), row.names = FALSE)
 
-## get bootstrap confidence intervals
-quantile(boot.4[,1], probs = c(0.025, 0.975))
-quantile(boot.4[,2], probs = c(0.025, 0.975))
+## confirm the performance of the recommended sample size and decision thresholds
+m.con <- 99000
+registerDoSNOW(cl)
+pb <- txtProgressBar(max = m.con, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+## extract sample size recommendation
+n.thres <- ssd.thres[1]
+## define hyperparameters for multinomial distribution
+alphas1 <- rep(1,12); betas1 <- seq(12, 1, by = -1)
+alphas2 <- rep(1,12); betas2 <- seq(12, 1, by = -1)
+## extract list of outcomes from matrix in createTree()
+cats <- apply(tree.mat, 2, function(x){which(x == 1)})
+tic <- Sys.time()
+con.thres <- foreach(i=1:m.con, .combine='rbind',
+                     .options.snow=opts, .errorhandling = "remove") %dopar% {
+                       n <- n.thres
+                       
+                       ## generate multinomial data
+                       set.seed(1200 + i)
+                       y1 <- as.numeric(rmultinom(1, n, params.full[(2*i-1)%%60,]))
+                       y2 <- as.numeric(rmultinom(1, n, params.full[ifelse((2*i)%%60==0, 60, (2*i)%%60),]))
+                       
+                       ## get posterior parameters
+                       alphas.1 <- alphas1 + head(y1, length(y1) - 1)
+                       betas.1 <- betas1 + n - cumsum(head(y1, length(y1) - 1))
+                       
+                       alphas.2 <- alphas2 + head(y2, length(y2) - 1)
+                       betas.2 <- betas2 + n - cumsum(head(y2, length(y2) - 1))
+                       
+                       ## get posterior probabilities
+                       list.temp <- getProbsMulti(cbind(alphas.1, betas.1), cbind(alphas.2, betas.2),
+                                                  seed = i + m.con, 
+                                                  outcomes = cats, 
+                                                  deltas = cbind(rep(0, 5), rep(Inf, 5)), mm = 10000)
+                       
+                       as.numeric(list.temp)
+                     }
+toc <- Sys.time()
+toc - tic
+
+## save results
+write.csv(con.thres, "con_thres.csv", row.names = FALSE)
+
+## confirm FDR and average power
+## check which posterior probabilities are greater than the recommended threshold
+bin <- t(apply(con.thres, 1, function(x, y){round(x >= y)}, y = ssd.thres[2:6]))
+## determine which repetitions have no discoveries to avoid division by 0
+zeros <- rowMeans(bin) == 0
+## create a matrix that dictates which hypotheses are true (1) and false (0)
+trues <- NULL
+for (j in 1:4){
+  comb.temp <- combn(5,j)
+  for (k in 1:ncol(comb.temp)){
+    trues <- rbind(trues, ifelse(1:5 %in% comb.temp[,k], 0, 1))
+  }
+}
+
+## repeat for all simulation repetitions
+trues.all <- trues[rep(1:30, m.con/30),]
+
+## compute confirmatory power and FDR
+fdr.thres <- mean(ifelse(zeros, 0, rowSums((1-trues.all)*bin)/rowSums(bin))) ## 0.0501
+pwr.thres <- mean(ifelse(zeros, 0, rowSums(trues.all*bin)/rowSums(trues.all))) ## 0.8009
 
 ## get recommendations for frequentist sample size calculation with 
 ## the Bonferroni correction
@@ -464,38 +424,14 @@ theta.a <- mars.full[1,]
 theta.b <- c(mars.full[4,1], mars.full[2, 2:5])
 
 ## this function returns the sample size recommendation for a given
-## alpha value (type I error), beta value (type II error), and marginal
+## alpha value (FWER), beta value (type II error), and marginal
 ## success probabilities for groups A and B
-sampleSizeBon <- function(alpha, beta, thetas){
-  ceiling((qnorm(1-alpha) - qnorm(beta))^2*(1/thetas[1] + 1/thetas[2] -2)/(log(thetas[2]) - log(thetas[1]))^2)
-}
 
-## get sample size recommendations
-samps.bon <- as.numeric(apply(rbind(theta.a, theta.b), 2, sampleSizeBon, alpha = 0.01, beta = 0.2))
-
-## return average sample size
-mean(samps.bon)
-
-## now get sample size recommendation based on average power
+## we get sample size recommendation based on average power
 ## (i.e., what is the sample size such that the total power of
 ## all the hypothesis tests exceeds 5*0.8 = 4)
 
-## the inputs are the same for this function as sampleSizeBon except
-## we now pass in the sample size instead of the type II error rate
-totalPower <- function(alpha, n, thetas){
-  total.pwr <- 0
-  for (j in 1:ncol(thetas)){
-    pwr.temp <- pnorm(qnorm(1 - alpha), mean = sqrt(n)*(log(theta.b[j])-log(theta.a[j]))/sqrt(1/theta.a[j] + 1/theta.b[j] - 2), 
-                      sd = 1, lower.tail = FALSE)
-    total.pwr <- total.pwr + pwr.temp
-  }
-  return(total.pwr)
-}
-
-## check total power at mean sample size recommendation
-totalPower(0.01, 25349, rbind(theta.a, theta.b))
-
-## we now create a function with a "target" for power
+## we create a function with a "target" for power
 ## to put into a root finding algorithm and find the
 ## sample size required
 totalPowerRoot <- function(alpha, n, thetas, target){
